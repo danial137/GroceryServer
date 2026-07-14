@@ -15,11 +15,20 @@ export const getFlashDeals = async (req: Request, res: Response) => {
         : 0;
     return { ...p, discount };
   });
-    res.json({products:productsWithDiscount.slice(0,8)})
+  res.json({ products: productsWithDiscount.slice(0, 8) });
 };
 
 //GET /api / prodcuts
 
 export const getProducts = async (req: Request, res: Response) => {
+  const { category, search, minPrice,maxPrice, sort } = req.query;
+
+  const where: any = {};
+
+  if (category && category !== "all") where.category = category as string;
+    if (search) where.name = { contains: search as string, mode: "insensitive" };
     
-}
+    if (minPrice || maxPrice) {
+        
+    }
+};
