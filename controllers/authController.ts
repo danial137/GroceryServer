@@ -60,7 +60,7 @@ export const register = async (req: Request, res: Response) => {
 // Login
 // POST / api/auth / login
 
-export const Login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
