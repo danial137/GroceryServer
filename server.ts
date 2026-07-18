@@ -3,6 +3,7 @@ import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import authRouter from "./routes/authRoutes.js";
 import productRouter from "./routes/productRoutes.js";
+import uploadRouter from "./routes/uploadRoutes.js";
 
 const app = express();
 
@@ -17,15 +18,14 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 app.use("api/auth", authRouter);
-app.use('/api/products', productRouter)
+app.use("/api/products", productRouter);
+app.use("/api/upload", uploadRouter);
 
 // error handling
 
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
-  
-  console.error(error)
-  res.status(500).json({message: error.mesage})
-
+  console.error(error);
+  res.status(500).json({ message: error.mesage });
 });
 
 app.listen(port, () => {
