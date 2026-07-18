@@ -64,6 +64,30 @@ export const createOrder = async (req: Request, res: Response) => {
       paymentMethod,
       subtotal,
       deliveryFee,
+      tax,
+      total,
+      statusHistory: [
+        {
+          status: "places",
+          note: "Order places successfully",
+          timestamp: new Date(),
+        },
+      ],
     },
   });
+
+  if (paymentMethod === "card") {
+    // stripe payment link
+    }
+    
+    res.json({ order })
+    
+    //Decrease stock
+
+    for (const item of orderItems) {
+        await prisma.product.update({
+            where: { id: item.product },
+            data:{stock:{decrement: item.quantity}}
+        })
+    }
 };
