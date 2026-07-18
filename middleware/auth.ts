@@ -13,8 +13,19 @@ const auth = (req: Request, res: Response, next: NextFunction) => {
       const token = authHeader.split("")[1]
 
 
-      const decoded = jwt.verify
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string }
+    
+    req.user = { id: decoded.id }
+
+    next()
+
+  } catch (error) {
+
+    return res.status(401).json({message: "Token is not valid"})
 
 
-  } catch (error) {}
+  }
 };
+
+
+export default auth
