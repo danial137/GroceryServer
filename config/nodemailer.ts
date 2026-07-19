@@ -19,10 +19,14 @@ const sendEmail = async ({
   subject: string;
   body: string;
 }) => {
-  await transporter.sendMail({
+  const response = await transporter.sendMail({
     from: "",
     to,
     subject,
     html: body,
   });
+
+  return response;
 };
+
+export default sendEmail;
