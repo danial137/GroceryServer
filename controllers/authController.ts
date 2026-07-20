@@ -2,7 +2,7 @@ import { Request, response, Response } from "express";
 import { prisma } from "../config/prisma.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
+import sendEmail from "../utils/sendEmail.js";
 // generate JWT token
 
 const generateToken = (id: string) => {
@@ -91,4 +91,30 @@ export const login = async (req: Request, res: Response) => {
   userData.isAdmin = getAdminStatus(userData.email);
 
   res.status(201).json({ user: userData, token });
+};
+
+
+export const testEmail = async (req: Request, res: Response) => {
+  try {
+    await sendEmail({
+      to: "danial79fakhrabadi@gmail.com",
+      subject: "Resend Test",
+      body: `
+        <h1>سلام دانیال 👋</h1>
+        <p>اگر این ایمیل رو دریافت کردی یعنی Resend با موفقیت کانفیگ شده.</p>
+      `,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Email sent successfully.",
+    });
+  } catch (error: any) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };

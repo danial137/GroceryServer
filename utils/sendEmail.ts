@@ -9,14 +9,18 @@ interface SendEmailProps {
 }
 
 const sendEmail = async ({ to, subject, body }: SendEmailProps) => {
-  const response = await resend.emails.send({
-    from: "onboarding@resend.dev",
+  const { data, error } = await resend.emails.send({
+    from: process.env.EMAIL_FROM!,
     to,
     subject,
     html: body,
   });
 
-  return response;
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
 };
 
 export default sendEmail;
