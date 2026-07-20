@@ -207,11 +207,18 @@ const autoAssignRider = inngest.createFunction(
       if (order.deliveryPartnerId)
         return { skipped: true, reason: "alredy assigned" };
 
-      if (["Cancelled", "delivered"].includes(order.status as string ))
-        return {
-          skipped: true,
-          reason: "Already assigned",
-        };
+      if (["Cancelled", "delivered"].includes(order.status as string))
+        return { skipped: true, reason: `Order is ${order.status}` };
+    });
+
+    // find an active rider not currently delivering
+
+    const busyOrders = await prisma.order.findMany({
+      where: {
+        status: { in: ["Assignment", "Packed", "Out for Delivery"] },
+
+        deliveryPartnerId: { not: null },
+      },
     });
   },
 );
