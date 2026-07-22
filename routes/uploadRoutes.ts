@@ -15,7 +15,7 @@ uploadRouter.post("/", auth, upload.single("image"), async (req, res) => {
     }
 
     const b64 = Buffer.from(req.file.buffer).toString("base64");
-    const dataURI = "data" + req.file.mimetype + ";base64" + b64;
+    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
 
     const result = await cloudinary.uploader.upload(dataURI, {
       folder: "grocery-del",
