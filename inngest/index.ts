@@ -1,6 +1,7 @@
 import { cron, Inngest } from "inngest";
 import { prisma } from "../config/prisma.js";
 import sendEmail from "../utils/sendEmail.js";
+import { timeStamp } from "node:console";
 
 const LOW_STOCK_THRESHOLD = 10;
 
@@ -198,6 +199,7 @@ const autoAssignRider = inngest.createFunction(
     await step.sleep("wait-5-min", "5m");
 
     const result = await step.run("assign-rider", async () => {
+
       const order = await prisma.order.findUnique({ where: { id: orderId } });
 
       // skip if order doesnt exist alredy assigned. or cancelled
@@ -209,7 +211,7 @@ const autoAssignRider = inngest.createFunction(
 
       if (["Cancelled", "delivered"].includes(order.status as string))
         return { skipped: true, reason: `Order is ${order.status}` };
-    });
+    
 
     // find an active rider not currently delivering
 
@@ -219,9 +221,55 @@ const autoAssignRider = inngest.createFunction(
 
         deliveryPartnerId: { not: null },
       },
+
+      select: { deliveryPartnerId: true },
     });
-  },
-);
+
+    const busyRiderIds = busyOrders.map((o) => o.deliveryPartnerId);
+
+    const availebleRider = await prisma.deliveryPartner.findFirst({
+      where: {
+        isActive: true,
+        id: { notIn: busyRiderIds as string[] },
+      },
+    });
+      if (!availebleRider) return { skipped: true, resoan: "No riders availble" };
+      
+      //generate 6 digit OTP
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString()
+
+      const history = (Array.isArray(order.statusHistory) ? order.statusHistory : []) as any[];
+      history.push({
+
+        status: "Assigned",
+        note: `Auto-assigned to ${availebleRider.name}`,
+        timeStamp:new Date(),
+      })
+      await prisma.order.update({
+        where: { id: orderId },
+        data: {
+          
+          deliveryPartnerId: availebleRider.id,
+          deliveryOtp: otp,
+          status: "Assigned",
+          statusHistory:history,
+
+        }
+      })
+
+      return {
+        assigned: true,
+        riderId: availebleRider, name,
+        orderId: orderId,
+
+
+      }
+
+    });
+
+    return result
+  });
 
 // Create an empty array where we'll export future Inngest functions
-export const functions = [checkLowStock, sendMonthlyOffers];
+export const functions = [checkLowStock, sendMonthlyOffers,autoAssignRider];
