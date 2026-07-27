@@ -133,5 +133,6 @@ export const assignDeliveryPartner = async (req:Request,res:Response) => {
   await prisma.order.update({
     where: { id: order!.id },
     data: { deliveryPartnerId: partner!.id, deliveryOtp:otp, status, statusHistory:history}
-})
+  })
+  res.json({order})
 }
