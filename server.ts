@@ -9,6 +9,7 @@ import { serve } from "inngest/express";
 import { inngest, functions } from "./inngest/index.js"
 import addressRouter from "./routes/addressRoutes.js";
 import adminRouter from "./routes/adminRoutes.js";
+import deliveryPartnerRouter from "./routes/deliveryPartnerRoutes.js";
 const app = express();
 
 // Middleware
@@ -28,6 +29,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/addresses", addressRouter)
 app.use('/api/admin', adminRouter)
 app.use("/api/inngest", serve({ client: inngest, functions }));
+app.use('/api/delivey',deliveryPartnerRouter)
 
 // error handling
 

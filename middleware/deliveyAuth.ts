@@ -30,7 +30,7 @@ const deliveryAuth = async (
       where: { id: decoded.id },
     });
     if (!partner || !partner.isActive) {
-      return res.status(403).json({ message: "Acount is deactived" });
+      return res.status(403).json({ message: "Account is deactived" });
     }
 
     req.partner = partner;
