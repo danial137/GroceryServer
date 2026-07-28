@@ -73,6 +73,23 @@ export const getMyDelivery = async (req: Request, res: Response) => {
 export const geDeliveryDetail = async (req: Request, res: Response) => {
   const order = await prisma.order.findFirst({
     where: { id: req.params.id as string, deliveryPartnerId: req.partner!.id },
-    include: {},
+    include: { user: { select: { name: true, email: true, phone: true } } },
+  });
+
+  if (!order) {
+    return res.status(404).json({ message: "delivery not found" });
+  }
+
+  res.json({ order });
+};
+
+//complete delivery with otp
+// put /api/delivery/my-deliveries/:id/complete
+
+export const completeDelivery = async (req: Request, res: Response) => {
+  const { otp } = req.body;
+
+  const order = await prisma.order.findFirst({
+    where: { id: req.params.id as string, deliveryPartnerId: req.partner!.id },
   });
 };
