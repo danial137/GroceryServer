@@ -33,7 +33,7 @@ export const register = async (req: Request, res: Response) => {
   }
 
   const existingUser = await prisma.user.findUnique({
-    where: { email: email.toLwerCase() },
+    where: { email: email.toLowerCase() },
   });
 
   if (existingUser) {
@@ -70,7 +70,7 @@ export const login = async (req: Request, res: Response) => {
   }
 
   const user = await prisma.user.findUnique({
-    where: { email: email.toLwerCase() },
+    where: { email: email.toLowerCase() },
     include: { addresses: true },
   });
 
