@@ -35,7 +35,7 @@ app.use('/api/delivey',deliveryPartnerRouter)
 
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
   console.error(error);
-  res.status(500).json({ message: error.mesage });
+ res.status(500).json({ message: error.message });
 });
 
 app.listen(port, () => {

@@ -7,6 +7,8 @@ import { inngest } from "../inngest/index.js";
 // post /api/order
 
 export const createOrder = async (req: Request, res: Response) => {
+    console.log("=== CREATE ORDER CALLED ===");
+    console.log(req.body);
   const { items, shippingAddress, paymentMethod } = req.body;
 
   // check if order items are empty
@@ -17,9 +19,13 @@ export const createOrder = async (req: Request, res: Response) => {
 
   // look up actual price from the database
 
-  const productId = items.map((i: any) => i.products);
+  const productId = items.map((i: any) => i.product);
   const products = await prisma.product.findMany({
-    where: { id: { in: productId } },
+    where: {
+      id: {
+        in: productId,
+      },
+    },
   });
 
   const productMap: Record<string, (typeof products)[0]> = {};
@@ -107,26 +113,40 @@ export const createOrder = async (req: Request, res: Response) => {
 // get /api/orders
 
 export const getUserOrder = async (req: Request, res: Response) => {
-  const { status } = req.body;
+  try {
+    const status = req.query.status as string;
 
-  const where: any = {
-    userId: req.user!.id,
-    NO: [{ paymentMethod: "card", isPaid: false }],
-  };
+    const where: any = {
+      userId: req.user!.id,
+    };
 
-  if (status && status !== "all") {
-    where.status = status;
+    if (status && status !== "all") {
+      where.status = status;
+    }
+
+    const orders = await prisma.order.findMany({
+      where,
+      include: {
+        deliveryPartner: {
+          select: {
+            name: true,
+            phone: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    console.log("ORDERS:", orders);
+
+    res.json({ orders });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Server Error" });
   }
-
-  const orders = await prisma.order.findMany({
-    where,
-    include: { deliveryPartner: { select: { name: true, phone: true } } },
-    orderBy: { createdAt: "desc" },
-  });
-
-  res.json({ orders });
 };
-
 // GET single order
 // GET /api/orders/:id
 
@@ -136,10 +156,12 @@ export const getOrder = async (req: Request, res: Response) => {
     include: {
       deliveryPartner: {
         select: { name: true, phone: true, avatar: true, vehicleType: true },
+        
       },
+    
     },
   });
-
+console.log(order);
   if (!order) {
     return res.status(404).json({ message: "Order not found" });
   }
